@@ -11,7 +11,13 @@ function ColorModels = initColorModels(IMG, Mask, MaskOutline, LocalWindows, Bou
     %ColorModels{i,3} is seperatibility
     %ColorModels{i,4} is the F_gmdist
     %ColorModels{i,5} is the B_gmdist
-    ColorModels = cell(num_windows,4);
+    ColorModels = containers.Map;
+    ColorModels.Confidences = cell(num_windows, 1);
+    ColorModels.Segment = cell(num_windows, 1);
+    ColorModels.Seperate = cell(num_windows, 1);
+    ColorModels.Foreground = cell(num_windows,1);
+    ColorModels.Background = cell(num_windows, 1);
+    
     MaskBoundary = bwperim(Mask, BoundaryWidth);
     
     for i = 1:num_windows
@@ -30,20 +36,20 @@ function ColorModels = initColorModels(IMG, Mask, MaskOutline, LocalWindows, Bou
                 end
             end
         end
-        ColorModels{i,4} = F_Points;
-        ColorModels{i,5} = B_Points;
+        ColorModels.Foreground{i} = F_Points;
+        ColorModels.Background{i} = B_Points;
     end
     
     
     for i = 1:num_windows
         x_pos = LocalWindows(i, 1) - WindowWidth/2;
         y_pos = LocalWindows(i, 2) - WindowWidth/2;
-        ColorModels{i,1} = Mask(x_pos:x_pos+WindowWidth, y_pos:y_pos+WindowWidth);
-        ColorModels{i,2} = zeros(WindowWidth);
+        ColorModels.Segment{i} = Mask(x_pos:x_pos+WindowWidth, y_pos:y_pos+WindowWidth);
+        ColorModels.Confidences{i} = zeros(WindowWidth);
         numerator = 0;
         denominator = 0;
-        gmm_f = fitgmdist(ColorModels{i,4}, 2);
-        gmm_b = fitgmdist(ColorModels{i,5}, 2);
+        gmm_f = fitgmdist(ColorModels.Foreground{i}, 2);
+        gmm_b = fitgmdist(ColorModels.Background{i}, 2);
         for j = 1:WindowWidth
             for k = 1:WindowWidth
                 x_pos = LocalWindows(i, 1) + j - WindowWidth/2;
@@ -51,13 +57,13 @@ function ColorModels = initColorModels(IMG, Mask, MaskOutline, LocalWindows, Bou
                 f_poster = gmm_f.posterior(labIMG(x_pos, y_pos,:));
                 b_poster = gmm_b.posterior(labIMG(x_pos, y_pos,:));
                 pc = f_poster/(f_poster + b_poster);
-                ColorModels{i,2}(j,k) = pc;
+                ColorModels.Confidences{i}(j,k) = pc;
                 lil_omega = exp(-(D(x_pos, y_pos))^2/(WindowWidth/2)^2);
                 numerator = numerator + abs(pc-Mask(x_pos, y_pos))*lil_omega;
                 denominator = denominator + lil_omega;
             end
         end
-        ColorModels{i,3} = 1 - numerator/denominator;
+        ColorModels.Seperate{i} = 1 - numerator/denominator;
         
     end
     

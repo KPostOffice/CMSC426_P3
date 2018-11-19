@@ -4,8 +4,8 @@ function ShapeConfidences = initShapeConfidences(LocalWindows, ColorConfidences,
     ShapeConfidences = cell(num_windows, 1);
     for i = 1:num_windows
         ShapeConfidences{i} = zeros(WindowWidth);
-        D = bwdist(bwperim(ColorConfidences{i,1}));
-        c_conf = ColorConfidences{i,3};
+        D = bwdist(bwperim(ColorConfidences.Segment{i}));
+        c_conf = ColorConfidences.Seperate{i};
         for j = 1:WindowWidth
             for k = 1:WindowWidth
                 if c_conf > fcutoff

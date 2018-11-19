@@ -11,21 +11,22 @@ function ColorModels = initColorModels(IMG, Mask, MaskOutline, LocalWindows, Bou
     %ColorModels{i,3} is seperatibility
     %ColorModels{i,4} is the F_gmdist
     %ColorModels{i,5} is the B_gmdist
-    ColorModels = cell(num_windows,4);
+    ColorModels = containers.Map;
+    ColorModels.Confidences = cell(num
     MaskBoundary = bwperim(Mask, BoundaryWidth);
     
     for i = 1:num_windows
         F_Points = [];
         B_Points = [];
-        for j = 1:-WindowWidth:WindowWidth
-            for k = -WindowWidth:WindowWidth
+        for j = (-WindowWidth)/2:WindowWidth/2
+            for k = (-WindowWidth)/2:WindowWidth/2
                 x_pos = LocalWindows(i, 1) + j;
                 y_pos = LocalWindows(i, 2) + k;
                 if ~ MaskBoundary(x_pos, y_pos) == 1
                     if Mask(x_pos, y_pos) == 1
-                        F_Points = [F_Points; reshape(labIMG(i,j,:), 1, 3)]; 
+                        F_Points = [F_Points; reshape(labIMG(x_pos, y_pos,:), 1, 3)]; 
                     else
-                        B_Points = [B_Points; reshape(labIMG(i,j,:), 1, 3)];
+                        B_Points = [B_Points; reshape(labIMG(x_pos, y_pos,:), 1, 3)];
                     end
                 end
             end
@@ -42,13 +43,14 @@ function ColorModels = initColorModels(IMG, Mask, MaskOutline, LocalWindows, Bou
         ColorModels{i,2} = zeros(WindowWidth);
         numerator = 0;
         denominator = 0;
-        gmm_f
+        gmm_f = fitgmdist(ColorModels{i,4}, 2);
+        gmm_b = fitgmdist(ColorModels{i,5}, 2);
         for j = 1:WindowWidth
             for k = 1:WindowWidth
                 x_pos = LocalWindows(i, 1) + j - WindowWidth/2;
                 y_pos = LocalWindows(i, 2) + k - WindowWidth/2;
-                f_poster = ColorModels{i,4}.posterior(labIMG(x_pos, y_pos,:));
-                b_poster = ColorModels{i,5}.posterior(labIMG(x_pos, y_pos,:));
+                f_poster = gmm_f.posterior(labIMG(x_pos, y_pos,:));
+                b_poster = gmm_b.posterior(labIMG(x_pos, y_pos,:));
                 pc = f_poster/(f_poster + b_poster);
                 ColorModels{i,2}(j,k) = pc;
                 lil_omega = exp(-(D(x_pos, y_pos))^2/(WindowWidth/2)^2);

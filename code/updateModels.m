@@ -26,8 +26,8 @@ function [mask, LocalWindows, ColorModels, ShapeConfidences] = ...
         gmm_historic_f = fitgmdist(ColorModels{i,4}, 2);
         gmm_historic_b = fitgmdist(ColorModels{i,5}, 2); 
         historic_count = 0;  % Must be compared to new_count later to determine change in number of foreground pixels
-        new_data_f = ColorModels{i,4};  % Create copy of historic data to add to
-        new_data_b = ColorModels{i,5};  %  "                                 "
+        new_data_f = ColorModels.Foreground{i};  % Create copy of historic data to add to
+        new_data_b = ColorModels.Background{i};  %  "                                 "
         for j = (-WindowWidth/2):WindowWidth/2  %  Iterates over full windowidth
             for k = (-WindowWidth/2):WindowWidth/2
                 x_pos = NewLocalWindows(i,1) + j;  % calculates x position based on window location
@@ -61,16 +61,16 @@ function [mask, LocalWindows, ColorModels, ShapeConfidences] = ...
         end
         
         if abs(new_count - old_count)/old_count < 0.05
-            ColorModels{i,4} = new_data_f;
-            ColorModels{i,5} = new_data_b;
+            ColorModels.Foreground{i} = new_data_f;
+            ColorModels.Background{i} = new_data_b;
             x_pos = LocalWindows(i, 1) - WindowWidth/2;
             y_pos = LocalWindows(i, 2) - WindowWidth/2;
-            ColorModels{i,1} = Mask(x_pos:x_pos+WindowWidth, y_pos:y_pos+WindowWidth);
-            ColorModels{i,2} = zeros(WindowWidth);
+            ColorModels.Segment{i} = WarpedMask(x_pos:x_pos+WindowWidth, y_pos:y_pos+WindowWidth);
+            ColorModels.Confidences{i} = zeros(WindowWidth);
             numerator = 0;
             denominator = 0;
-            gmm_f = fitgmdist(ColorModels{i,4}, 2);
-            gmm_b = fitgmdist(ColorModels{i,5}, 2);
+            gmm_f = fitgmdist(ColorModels.Foreground{i}, 2);
+            gmm_b = fitgmdist(ColorModels.Background{i}, 2);
             for j = 1:WindowWidth
                 for k = 1:WindowWidth
                     x_pos = NewLocalWindows(i, 1) + j - WindowWidth/2;
@@ -78,21 +78,21 @@ function [mask, LocalWindows, ColorModels, ShapeConfidences] = ...
                     f_poster = gmm_f.posterior(labIMG(x_pos, y_pos,:));
                     b_poster = gmm_b.posterior(labIMG(x_pos, y_pos,:));
                     pc = f_poster/(f_poster + b_poster);
-                    ColorModels{i,2}(j,k) = pc;
+                    ColorModels.Confidences{i}(j,k) = pc;
                     lil_omega = exp(-(D(x_pos, y_pos))^2/(WindowWidth/2)^2);
                     numerator = numerator + abs(pc-Mask(x_pos, y_pos))*lil_omega;
                     denominator = denominator + lil_omega;
                 end
             end
-            ColorModels{i,3} = 1 - numerator/denominator;
+            ColorModels.Seperate{i} = 1 - numerator/denominator;
             
         end
     end
     
     for i = 1:num_windows
         ShapeConfidences{i} = zeros(WindowWidth);
-        D = bwdist(bwperim(ColorModels{i,1}));
-        c_conf = ColorModels{i,3};
+        D = bwdist(bwperim(ColorModels.Segment{i}));
+        c_conf = ColorModels.Seperate{i};
         for j = 1:WindowWidth
             for k = 1:WindowWidth
                 if c_conf > fcutoff
@@ -109,8 +109,8 @@ function [mask, LocalWindows, ColorModels, ShapeConfidences] = ...
     denominators = zeros(size(CurrentFrame));
     
     for i = 1:num_windows
-        gmm_f = fitgmdist(ColorModels{i,4}, 2);
-        gmm_b = fitgmdist(ColorModels{i,5}, 2);
+        gmm_f = fitgmdist(ColorModels.Foreground{i}, 2);
+        gmm_b = fitgmdist(ColorModels.Background{i}, 2);
         for j = 1:WindowWidth
             for k = 1:WindowWidth
                 x_pos = NewLocalWindows(i, 1) + j - WindowWidth/2;
