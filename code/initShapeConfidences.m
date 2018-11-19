@@ -9,7 +9,7 @@ function ShapeConfidences = initShapeConfidences(LocalWindows, ColorConfidences,
         for j = 1:WindowWidth
             for k = 1:WindowWidth
                 if c_conf > fcutoff
-                    sig = SigmaMin + A*(c_conf - cutoff)^R;
+                    sig = SigmaMin + A*(c_conf - fcutoff)^R;
                 else
                     sig = sigMin;
                 end

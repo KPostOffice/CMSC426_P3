@@ -89,6 +89,8 @@ function [mask, LocalWindows, ColorModels, ShapeConfidences] = ...
         end
     end
     
+    
+    
     numerators = zeros(size(CurrentFrame));
     denominators = zeros(size(CurrentFrame));
     
@@ -133,7 +135,7 @@ function [mask, LocalWindows, ColorModels, ShapeConfidences] = ...
     
     PB = numerators ./ denominators;
     
-    mask = PB > 0.8;
+    mask = PB > ProbMaskThreshold;
     
     LocalWindows = NewLocalWindows;
 end

@@ -89,6 +89,22 @@ function [mask, LocalWindows, ColorModels, ShapeConfidences] = ...
         end
     end
     
+    for i = 1:num_windows
+        ShapeConfidences{i} = zeros(WindowWidth);
+        D = bwdist(bwperim(ColorModels{i,1}));
+        c_conf = ColorModels{i,3};
+        for j = 1:WindowWidth
+            for k = 1:WindowWidth
+                if c_conf > fcutoff
+                    sig = SigmaMin + A*(c_conf - fcutoff)^R;
+                else
+                    sig = sigMin;
+                end
+                ShapeConfidences{i}(j,k) = 1 - exp(-(D(j,k)^2)/sig^2);
+            end
+        end
+    end
+    
     numerators = zeros(size(CurrentFrame));
     denominators = zeros(size(CurrentFrame));
     
