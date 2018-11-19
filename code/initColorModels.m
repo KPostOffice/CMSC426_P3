@@ -11,12 +11,8 @@ function ColorModels = initColorModels(IMG, Mask, MaskOutline, LocalWindows, Bou
     %ColorModels{i,3} is seperatibility
     %ColorModels{i,4} is the F_gmdist
     %ColorModels{i,5} is the B_gmdist
-    ColorModels = containers.Map;
-    ColorModels.Confidences = cell(num_windows, 1);
-    ColorModels.Segment = cell(num_windows, 1);
-    ColorModels.Seperate = cell(num_windows, 1);
-    ColorModels.Foreground = cell(num_windows,1);
-    ColorModels.Background = cell(num_windows, 1);
+    ColorModels = containers.Map({"Confidences", "Segment", "Seperate", "Foreground", "Background"}, ...
+        {cell(num_windows, 1), cell(num_windows, 1), cell(num_windows, 1), cell(num_windows, 1), cell(num_windows, 1)});
     
     MaskBoundary = bwperim(Mask, BoundaryWidth);
     
