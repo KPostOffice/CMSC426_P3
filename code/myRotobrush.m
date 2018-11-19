@@ -7,8 +7,8 @@
 % Some parameters you need to tune:
 WindowWidth = 50;  
 ProbMaskThreshold = 0.5; 
-NumWindows= 120; 
-BoundaryWidth = 5;
+NumWindows= 20; 
+BoundaryWidth = 6;
 
 % Load images:
 fpath = '../input';
@@ -29,13 +29,13 @@ for i=1:length(files)
 end
 
 % NOTE: to save time during development, you should save/load your mask rather than use ROIPoly every time.
-mask = roipoly(images{1});
-
+% mask = roipoly(images{1});
+mask = rgb2gray(imread('input/Mask1.png'));
 imshow(imoverlay(images{1}, boundarymask(mask,8),'red'));
 set(gca,'position',[0 0 1 1],'units','normalized')
 F = getframe(gcf);
 [I,~] = frame2im(F);
-imwrite(I, fullfile(fpath, strip(imageNames(1,:))));
+%imwrite(I, fullfile(fpath, strip(imageNames(1,:))));
 outputVideo = VideoWriter(fullfile(fpath,'video.mp4'),'MPEG-4');
 open(outputVideo);
 writeVideo(outputVideo,I);
@@ -53,7 +53,7 @@ SigmaMin = 2;
 SigmaMax = WindowWidth;
 R = 2;
 %%% **** %%%
-A = (SigmaMax - SigmaMin)/(1 - fcutoff)^r;
+A = (SigmaMax - SigmaMin)/(1 - fcutoff)^R;
 ShapeConfidences = ...
     initShapeConfidences(LocalWindows,ColorModels,...
     WindowWidth, SigmaMin, A, fcutoff, R);
