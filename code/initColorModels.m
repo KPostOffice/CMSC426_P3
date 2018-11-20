@@ -11,10 +11,13 @@ function ColorModels = initColorModels(IMG, Mask, MaskOutline, LocalWindows, Bou
     %ColorModels{i,3} is seperatibility
     %ColorModels{i,4} is the F_gmdist
     %ColorModels{i,5} is the B_gmdist
-    ColorModels = containers.Map({"Confidences", "Segment", "Seperate", "Foreground", "Background"}, ...
-        {cell(num_windows, 1), cell(num_windows, 1), cell(num_windows, 1), cell(num_windows, 1), cell(num_windows, 1)});
+    ColorModels.Confidences = cell(num_windows,1);
+    ColorModels.Segment = cell(num_windows,1);
+    ColorModels.Seperate = cell(num_windows,1);
+    ColorModels.Foreground = cell(num_windows,1);
+    ColorModels.Foreground = cell(num_windows,1);
     
-    MaskBoundary = bwperim(Mask, BoundaryWidth);
+    MaskBoundary = bwperim(Mask, 1);
     
     for i = 1:num_windows
         F_Points = [];
@@ -24,7 +27,7 @@ function ColorModels = initColorModels(IMG, Mask, MaskOutline, LocalWindows, Bou
                 x_pos = LocalWindows(i, 1) + j;
                 y_pos = LocalWindows(i, 2) + k;
                 if ~ MaskBoundary(x_pos, y_pos) == 1
-                    if Mask(x_pos, y_pos) == 1
+                    if Mask(x_pos, y_pos) ~= 0
                         F_Points = [F_Points; reshape(labIMG(x_pos, y_pos,:), 1, 3)]; 
                     else
                         B_Points = [B_Points; reshape(labIMG(x_pos, y_pos,:), 1, 3)];
@@ -44,14 +47,14 @@ function ColorModels = initColorModels(IMG, Mask, MaskOutline, LocalWindows, Bou
         ColorModels.Confidences{i} = zeros(WindowWidth);
         numerator = 0;
         denominator = 0;
-        gmm_f = fitgmdist(ColorModels.Foreground{i}, 2);
-        gmm_b = fitgmdist(ColorModels.Background{i}, 2);
+        gmm_f = fitgmdist(ColorModels.Foreground{i}, 1);
+        gmm_b = fitgmdist(ColorModels.Background{i}, 1);
         for j = 1:WindowWidth
             for k = 1:WindowWidth
                 x_pos = LocalWindows(i, 1) + j - WindowWidth/2;
                 y_pos = LocalWindows(i, 2) + k - WindowWidth/2;
-                f_poster = gmm_f.posterior(labIMG(x_pos, y_pos,:));
-                b_poster = gmm_b.posterior(labIMG(x_pos, y_pos,:));
+                f_poster = gmm_f.posterior(reshape(labIMG(x_pos, y_pos,:), 1, 3));
+                b_poster = gmm_b.posterior(reshape(labIMG(x_pos, y_pos,:), 1, 3));
                 pc = f_poster/(f_poster + b_poster);
                 ColorModels.Confidences{i}(j,k) = pc;
                 lil_omega = exp(-(D(x_pos, y_pos))^2/(WindowWidth/2)^2);

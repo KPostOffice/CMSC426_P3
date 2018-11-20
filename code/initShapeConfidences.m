@@ -11,7 +11,7 @@ function ShapeConfidences = initShapeConfidences(LocalWindows, ColorConfidences,
                 if c_conf > fcutoff
                     sig = SigmaMin + A*(c_conf - fcutoff)^R;
                 else
-                    sig = sigMin;
+                    sig = SigmaMin;
                 end
                 ShapeConfidences{i}(j,k) = 1 - exp(-(D(j,k)^2)/sig^2);
             end

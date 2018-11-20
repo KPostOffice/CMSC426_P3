@@ -17,21 +17,21 @@ function [mask, LocalWindows, ColorModels, ShapeConfidences] = ...
 % UPDATEMODELS: update shape and color models, and apply the result to generate a new mask.
 % Feel free to redefine this as several different functions if you prefer.
 
-    eps = 0.1
+    eps = 0.1;
     
     labIMG = rgb2lab(CurrentFrame);
 
     num_windows = size(NewLocalWindows, 1);
     for i = 1:num_windows
-        gmm_historic_f = fitgmdist(ColorModels{i,4}, 2);
-        gmm_historic_b = fitgmdist(ColorModels{i,5}, 2); 
+        gmm_historic_f = fitgmdist(ColorModels.Foreground{i}, 1);
+        gmm_historic_b = fitgmdist(ColorModels.Background{i}, 1); 
         historic_count = 0;  % Must be compared to new_count later to determine change in number of foreground pixels
         new_data_f = ColorModels.Foreground{i};  % Create copy of historic data to add to
         new_data_b = ColorModels.Background{i};  %  "                                 "
         for j = (-WindowWidth/2):WindowWidth/2  %  Iterates over full windowidth
             for k = (-WindowWidth/2):WindowWidth/2
-                x_pos = NewLocalWindows(i,1) + j;  % calculates x position based on window location
-                y_pos = NewLocalWindows(i,2) + k;  % calculates y position based on window location
+                x_pos = floor(NewLocalWindows(i,1) + j);  % calculates x position based on window location
+                y_pos = floor(NewLocalWindows(i,2) + k);  % calculates y position based on window location
                 f_poster = gmm_historic_f.posterior(labIMG(x_pos, y_pos,:));
                 b_poster = gmm_historic_b.posterior(labIMG(x_pos, y_pos,:));
                 pc = f_poster/(f_poster + b_poster);  % probability of foreground pixel based on posterior probablities
@@ -45,12 +45,12 @@ function [mask, LocalWindows, ColorModels, ShapeConfidences] = ...
         end
         
         new_count = 0;  % to compare with old count
-        gmm_new_f = fitgmdist(new_data_f, 2);  % create gmm's using new data as well
-        gmm_new_b = fitgmdist(new_data_b, 2);
+        gmm_new_f = fitgmdist(new_data_f, 1);  % create gmm's using new data as well
+        gmm_new_b = fitgmdist(new_data_b, 1);
         for j = (-WindowWidth)/2:WindowWidth/2
             for k = (-WindowWidth)/2:WindowWidth/2
-                x_pos = NewLocalWindows(i,1) + j;
-                y_pos = NewLocalWindows(i,2) + k;
+                x_pos = floor(NewLocalWindows(i,1) + j);
+                y_pos = floor(NewLocalWindows(i,2) + k);
                 f_poster = gmm_new_f.posterior(labIMG(x_pos, y_pos,:));
                 b_poster = gmm_new_b.posterior(labIMG(x_pos, y_pos,:));
                 pc = f_poster/(f_poster + b_poster);
@@ -63,10 +63,10 @@ function [mask, LocalWindows, ColorModels, ShapeConfidences] = ...
         if abs(new_count - old_count)/old_count < 0.05
             ColorModels.Foreground{i} = new_data_f;
             ColorModels.Background{i} = new_data_b;
-            x_pos = LocalWindows(i, 1) - WindowWidth/2;
-            y_pos = LocalWindows(i, 2) - WindowWidth/2;
+            x_pos = floor(NewLocalWindows(i, 1) - WindowWidth/2);
+            y_pos = floor(NewLocalWindows(i, 2) - WindowWidth/2);
             ColorModels.Segment{i} = WarpedMask(x_pos:x_pos+WindowWidth, y_pos:y_pos+WindowWidth);
-            ColorModels.Confidences{i} = zeros(WindowWidth);
+            ColorModels.Confidences{i} = zeros(WindowWidth+1);
             numerator = 0;
             denominator = 0;
             gmm_f = fitgmdist(ColorModels.Foreground{i}, 2);
