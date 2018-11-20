@@ -5,10 +5,10 @@
 % Feel free to modify this code as you see fit.
 
 % Some parameters you need to tune:
-WindowWidth = 30;  
+WindowWidth = 14;  
 ProbMaskThreshold = 0.4; 
-NumWindows= 50; 
-BoundaryWidth = 4;
+NumWindows= 60; 
+BoundaryWidth = 2;
 
 % Load images:
 fpath = '../input';
@@ -31,12 +31,12 @@ end
 % NOTE: to save time during development, you should save/load your mask rather than use ROIPoly every time.
 % mask = roipoly(images{1});
 mask = rgb2gray(imread('input/Mask1.png')) > 0;
-%imshow(imoverlay(images{1}, boundarymask(mask,8),'red'));
+imshow(imoverlay(images{1}, boundarymask(mask,8),'red'));
 figure
 set(gca,'position',[0 0 1 1],'units','normalized')
 F = getframe(gcf);
 [I,~] = frame2im(F);
-%imwrite(I, fullfile(fpath, strip(imageNames(1,:))));
+imwrite(I, fullfile(fpath, strip(imageNames(1,:))));
 outputVideo = VideoWriter(fullfile(fpath,'video.mp4'),'MPEG-4');
 open(outputVideo);
 writeVideo(outputVideo,I);
@@ -50,10 +50,10 @@ ColorModels = ...
 
 % You should set these parameters yourself:
 %%% **** %%%
-fcutoff = 0.5;
-SigmaMin = 2;
+fcutoff = 0.7;
+SigmaMin = 1;
 SigmaMax = WindowWidth;
-R = 2;
+R = 6;
 %%% **** %%%
 A = (SigmaMax - SigmaMin)/(1 - fcutoff)^R;
 ShapeConfidences = ...
@@ -61,11 +61,11 @@ ShapeConfidences = ...
     WindowWidth, SigmaMin, A, fcutoff, R);
 
 % Show initial local windows and output of the color model:
-%imshow(images{1})
-%hold on
-%showLocalWindows(LocalWindows,WindowWidth,'r.');
-%figure
-%hold off
+imshow(images{1})
+hold on
+showLocalWindows(LocalWindows,WindowWidth,'r.');
+figure
+hold off
 set(gca,'position',[0 0 1 1],'units','normalized')
 F = getframe(gcf);
 [I,~] = frame2im(F);
@@ -122,7 +122,7 @@ for prev=1:(length(files)-1)
     mask_outline = bwperim(mask,4);
 
     % Write video frame:
-    imshow(imoverlay(images{curr}, boundarymask(mask,8), 'red'));
+    imshow(mask);
     set(gca,'position',[0 0 1 1],'units','normalized')
     F = getframe(gcf);
     [I,~] = frame2im(F);

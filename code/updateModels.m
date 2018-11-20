@@ -22,7 +22,7 @@ function [mask, LocalWindows, ColorModels, ShapeConfidences] = ...
     labIMG = rgb2lab(CurrentFrame);
 
     num_windows = size(NewLocalWindows, 1);
-    fprintf("    1)Working on window:")
+    fprintf("    1) Working on window:")
     for i = 1:num_windows
         fprintf(" %i", i)
         gmm_historic_f = fitgmdist(ColorModels.Foreground{i}, 1);
@@ -45,7 +45,6 @@ function [mask, LocalWindows, ColorModels, ShapeConfidences] = ...
                 end
             end
         end
-        
         new_count = 0;  % to compare with old count
         gmm_new_f = fitgmdist(new_data_f, 1);  % create gmm's using new data as well
         gmm_new_b = fitgmdist(new_data_b, 1);
@@ -61,7 +60,6 @@ function [mask, LocalWindows, ColorModels, ShapeConfidences] = ...
                 end
             end
         end
-        
         if abs(new_count - historic_count)/historic_count < 0.05
             ColorModels.Foreground{i} = new_data_f;
             ColorModels.Background{i} = new_data_b;
@@ -90,7 +88,7 @@ function [mask, LocalWindows, ColorModels, ShapeConfidences] = ...
             
         end
     end
-    fprintf("\n    2)Working on window: ");
+    fprintf("\n    2) Working on window: ");
     for i = 1:num_windows
         fprintf(" %i", i)
         ShapeConfidences{i} = zeros(WindowWidth);
@@ -156,7 +154,6 @@ function [mask, LocalWindows, ColorModels, ShapeConfidences] = ...
     PB = numerators ./ denominators;
     
     mask = PB > ProbMaskThreshold;
-    size(mask)
     LocalWindows = NewLocalWindows;
 end
 

@@ -28,7 +28,7 @@ function [WarpedFrame, WarpedMask, WarpedMaskOutline, WarpedLocalWindows] = calc
     
     tform = estimateGeometricTransform(matchedP1,matchedP2, 'affine');
     WarpedMask = imwarp(Mask, tform, 'OutputView', imref2d(size(Mask))); 
-    WarpedMaskOutline = bwperim(Mask, 4);
+    WarpedMaskOutline = bwperim(WarpedMask, 4);
     WarpedFrame = imwarp(IMG1, tform, 'OutputView', imref2d(size(IMG1)));
     WarpedLocalWindows = transformPointsForward(tform, Windows);
 end
