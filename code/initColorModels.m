@@ -22,10 +22,10 @@ function ColorModels = initColorModels(IMG, Mask, MaskOutline, LocalWindows, Bou
     for i = 1:num_windows
         F_Points = [];
         B_Points = [];
-        for j = (-WindowWidth)/2:WindowWidth/2
-            for k = (-WindowWidth)/2:WindowWidth/2
-                x_pos = LocalWindows(i, 1) + j;
-                y_pos = LocalWindows(i, 2) + k;
+        for j = 1:WindowWidth
+            for k = 1:WindowWidth
+                x_pos = LocalWindows(i, 1) - WindowWidth/2 + j;
+                y_pos = LocalWindows(i, 2) - WindowWidth/2 + k;
                 if ~ MaskBoundary(x_pos, y_pos) == 1
                     if Mask(x_pos, y_pos) ~= 0
                         F_Points = [F_Points; reshape(labIMG(x_pos, y_pos,:), 1, 3)]; 

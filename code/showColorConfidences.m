@@ -1,4 +1,4 @@
-function [] = showColorConfidences(IMG,MaskOutline,ColorConfidences,LocalWindows,Width);
+function [] = showColorConfidences(IMG,MaskOutline,ColorConfidences,LocalWindows,Width)
 % SHOWCOLORCONFIDENCES: plots the color confidence for each local window.
 %
 % ColorConfidencs should be a cell array of color confidences (one per window).
@@ -31,8 +31,9 @@ for i = 1:length(LocalWindows)
     center = zeros(Width, Width);
     center(Width/2+1,Width/2+1) = 1;
     distFromCenter = bwdist(center);
-
+    
     LocalWeight = (distFromCenter + const).^(-1);
+    
     LocalNum = LocalWeight .* repmat(ColorConfidences{i},[Width Width]);
 
     ccNumer(yRange, xRange) = ccNumer(yRange, xRange) + LocalNum;

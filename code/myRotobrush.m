@@ -5,10 +5,10 @@
 % Feel free to modify this code as you see fit.
 
 % Some parameters you need to tune:
-WindowWidth = 40;  
-ProbMaskThreshold = 0.5; 
-NumWindows= 40; 
-BoundaryWidth = 6;
+WindowWidth = 30;  
+ProbMaskThreshold = 0.4; 
+NumWindows= 50; 
+BoundaryWidth = 4;
 
 % Load images:
 fpath = '../input';
@@ -44,7 +44,6 @@ writeVideo(outputVideo,I);
 % Sample local windows and initialize shape+color models:
 [mask_outline, LocalWindows] = initLocalWindows(images{1},mask,NumWindows,WindowWidth,true);
 
-max(LocalWindows)
 LocalWindows = [LocalWindows(:,2)  LocalWindows(:,1)];
 ColorModels = ...
     initColorModels(images{1},mask,mask_outline,LocalWindows,BoundaryWidth,WindowWidth);
@@ -61,7 +60,6 @@ ShapeConfidences = ...
     initShapeConfidences(LocalWindows,ColorModels,...
     WindowWidth, SigmaMin, A, fcutoff, R);
 
-LocalWindows
 % Show initial local windows and output of the color model:
 %imshow(images{1})
 %hold on
@@ -72,7 +70,7 @@ set(gca,'position',[0 0 1 1],'units','normalized')
 F = getframe(gcf);
 [I,~] = frame2im(F);
 
-showColorConfidences(images{1},mask_outline,ColorModels.Confidences,LocalWindows,WindowWidth+1);
+%showColorConfidences(images{1},mask_outline,ColorModels.Confidences,LocalWindows,WindowWidth);
 
 %%% MAIN LOOP %%%
 % Process each frame in the video.
@@ -82,16 +80,18 @@ for prev=1:(length(files)-1)
     
     %%% Global affine transform between previous and current frames:
     [warpedFrame, warpedMask, warpedMaskOutline, warpedLocalWindows] = calculateGlobalAffine(images{prev}, images{curr}, mask, LocalWindows);
-    
+    fprintf("    Affine calculated.\n")
     %%% Calculate and apply local warping based on optical flow:
     NewLocalWindows = ...
         localFlowWarp(warpedFrame, images{curr}, warpedLocalWindows,warpedMask,WindowWidth);
     
+    fprintf("    Local flow warp calculated.\n")
+    
     % Show windows before and after optical flow-based warp:
     imshow(images{curr});
     hold on
-    showLocalWindows(warpedLocalWindows,WindowWidth,'r.');
-    showLocalWindows(NewLocalWindows,WindowWidth,'b.');
+    showLocalWindows([warpedLocalWindows(:,2) warpedLocalWindows(:,1)],WindowWidth,'r.');
+    showLocalWindows([NewLocalWindows(:,2) NewLocalWindows(:,1)],WindowWidth,'b.');
     hold off
     
     %%% UPDATE SHAPE AND COLOR MODELS:
