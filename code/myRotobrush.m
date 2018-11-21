@@ -6,7 +6,7 @@
 
 % Some parameters you need to tune:
 WindowWidth = 14;  
-ProbMaskThreshold = 0.4; 
+ProbMaskThreshold = 0.05; 
 NumWindows= 60; 
 BoundaryWidth = 2;
 
@@ -30,7 +30,8 @@ end
 
 % NOTE: to save time during development, you should save/load your mask rather than use ROIPoly every time.
 % mask = roipoly(images{1});
-mask = rgb2gray(imread('input/Mask1.png')) > 0;
+mask = imread('input/Mask1.png');
+mask = rgb2gray(cat(3, mask, mask, mask));
 imshow(imoverlay(images{1}, boundarymask(mask,8),'red'));
 figure
 set(gca,'position',[0 0 1 1],'units','normalized')
@@ -50,10 +51,10 @@ ColorModels = ...
 
 % You should set these parameters yourself:
 %%% **** %%%
-fcutoff = 0.7;
+fcutoff = 0.6;
 SigmaMin = 1;
 SigmaMax = WindowWidth;
-R = 6;
+R = 2;
 %%% **** %%%
 A = (SigmaMax - SigmaMin)/(1 - fcutoff)^R;
 ShapeConfidences = ...
@@ -90,10 +91,12 @@ for prev=1:(length(files)-1)
     % Show windows before and after optical flow-based warp:
     imshow(images{curr});
     hold on
-    showLocalWindows([warpedLocalWindows(:,2) warpedLocalWindows(:,1)],WindowWidth,'r.');
-    showLocalWindows([NewLocalWindows(:,2) NewLocalWindows(:,1)],WindowWidth,'b.');
+    showLocalWindows([warpedLocalWindows(:,1) warpedLocalWindows(:,2)],WindowWidth,'b.');
+    showLocalWindows([NewLocalWindows(:,2) NewLocalWindows(:,1)],WindowWidth,'g.');
     hold off
-    
+    %title('Matlab local windows comparison')
+    %imshow(warpedMask);
+    %garbage = roipoly(images{curr});
     %%% UPDATE SHAPE AND COLOR MODELS:
     % This is where most things happen.
     % Feel free to redefine this as several different functions if you prefer.
@@ -122,7 +125,7 @@ for prev=1:(length(files)-1)
     mask_outline = bwperim(mask,4);
 
     % Write video frame:
-    imshow(mask);
+    imshow(imoverlay(images{curr}, boundarymask(mask,8), 'red'));
     set(gca,'position',[0 0 1 1],'units','normalized')
     F = getframe(gcf);
     [I,~] = frame2im(F);

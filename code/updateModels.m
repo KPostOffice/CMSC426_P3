@@ -16,7 +16,6 @@ function [mask, LocalWindows, ColorModels, ShapeConfidences] = ...
     )
 % UPDATEMODELS: update shape and color models, and apply the result to generate a new mask.
 % Feel free to redefine this as several different functions if you prefer.
-
     eps = 0.1;
     
     labIMG = rgb2lab(CurrentFrame);
@@ -60,7 +59,7 @@ function [mask, LocalWindows, ColorModels, ShapeConfidences] = ...
                 end
             end
         end
-        if abs(new_count - historic_count)/historic_count < 0.05
+        if abs(new_count - historic_count)/historic_count < 0.5
             ColorModels.Foreground{i} = new_data_f;
             ColorModels.Background{i} = new_data_b;
             x_pos = floor(NewLocalWindows(i, 1) - WindowWidth/2);

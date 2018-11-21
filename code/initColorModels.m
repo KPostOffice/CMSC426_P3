@@ -15,7 +15,7 @@ function ColorModels = initColorModels(IMG, Mask, MaskOutline, LocalWindows, Bou
     ColorModels.Segment = cell(num_windows,1);
     ColorModels.Seperate = cell(num_windows,1);
     ColorModels.Foreground = cell(num_windows,1);
-    ColorModels.Foreground = cell(num_windows,1);
+    ColorModels.Background = cell(num_windows,1);
     
     MaskBoundary = bwperim(Mask, 1);
     

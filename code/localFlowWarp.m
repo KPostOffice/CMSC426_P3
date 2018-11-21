@@ -19,7 +19,6 @@ function [NewLocalWindows] = localFlowWarp(WarpedPrevFrame, CurrentFrame, LocalW
         transform = [0 0];
         x_c = floor(LocalWindows(i,1));
         y_c = floor(LocalWindows(i,2));
-        t_count = 0;
         Vx_window = MaskVx((x_c - h_w + 1):(x_c + h_w), (y_c - h_w + 1):(y_c+h_w));
         Vy_window = MaskVy((x_c - h_w + 1):(x_c + h_w), (y_c - h_w + 1):(y_c+h_w));
         x_count = sum(sum(Vx_window ~= 0));
@@ -43,7 +42,7 @@ function [NewLocalWindows] = localFlowWarp(WarpedPrevFrame, CurrentFrame, LocalW
                 
             %    if Mask(x_pos, y_pos) == 1
              %       transform = transform + [flow.Vx(x_pos, y_pos) flow.Vy(x_pos,y_pos)]*flow.Magnitude(x_pos, y_pos);
-                    t_count = t_count + 1;
+                %    t_count = t_count + 1;
               %  end
            % end
         %end
